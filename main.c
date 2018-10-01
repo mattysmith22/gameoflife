@@ -3,8 +3,8 @@
 #include <curses.h>
 #include <string.h>
 
-#define GRID_WIDTH 20
-#define GRID_HEIGHT 20
+#define DEFAULT_GRID_WIDTH 20
+#define DEFAULT_GRID_HEIGHT 20
 
 const char cellLive = '#';
 const char cellDead = '-';
@@ -134,20 +134,30 @@ void winDraw(struct GameOfLife *gol)
     refresh();
 }
 
-int main()
+int main(int argc, char **argv)
 {
     struct GameOfLife gol;
     //initalise the curses screen
     initscr();
     cbreak(); //Disable buffering of typed characters
     noecho(); //suppress echo of character
-    
     mousemask(ALL_MOUSE_EVENTS, NULL);
-
-
     keypad(stdscr, TRUE); //capture special characters
-    
-    golInit(&gol, GRID_HEIGHT, GRID_WIDTH);
+    unsigned int width, height;
+    if(argc == 1)
+    {
+	golInit(&gol, DEFAULT_GRID_HEIGHT, DEFAULT_GRID_WIDTH);
+    }
+    else if(argc == 3)
+    {
+	height = strtol(argv[1], NULL, 0);
+	width = strtol(argv[2], NULL, 0);
+	golInit(&gol, height, width);
+    }
+    else
+    {
+	return 1;
+    }
 
     int ch;
     int running = 1;

@@ -28,6 +28,15 @@ Iteration: 0
 ```
 
 # How to use
+
+## Startup
+
+When compiled, you can run in two different ways:
+* With no arguments, a default grid size of 20x20 is chosen.
+* If two numerical arguments are given, they are assigned as their height and width respectively.
+
+## Usage
+
 Live cells are marked as a '#' whereas dead cells are marked as a '-'.
 
 You can toggle a cell between these two states by clicking on it.
