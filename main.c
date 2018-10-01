@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <curses.h>
 #include <string.h>
 
@@ -9,32 +10,51 @@ const char cellLive = '#';
 const char cellDead = '-';
 
 struct GameOfLife {
-	char grid[GRID_HEIGHT][GRID_WIDTH + 1];
+	char **grid;
+	unsigned int height, width;
 	unsigned int numIteration;
 };
 
-void golInit(struct GameOfLife *gol)
+void golInit(struct GameOfLife *gol, unsigned int height, unsigned int width)
 {
-    int x, y;
-    for(y = 0; y < GRID_HEIGHT; y++)
+    gol->height = height;
+    gol->width = width;
+
+    gol->grid = malloc(sizeof(char*) * height);
+
+    unsigned int x, y;
+    for(y = 0; y < height; y++)
     {
-	for(x = 0; x < GRID_WIDTH; x++)
+	gol->grid[y] = malloc(sizeof(char) * (width + 1));
+
+	for(x = 0; x < width; x++)
 	{
 	    gol->grid[y][x] = cellDead;
 	}
-	gol->grid[y][GRID_WIDTH] = '\0';
+	gol->grid[y][width] = '\0';
     }
 
     gol->numIteration = 0;
 }
 
-char golReadSafe(struct GameOfLife *gol, int x, int y)
+void golDisp(struct GameOfLife *gol)
 {
-    if(x < 0 || x >= GRID_WIDTH)
+    unsigned int y;
+    for(y = 0; y < gol->height; y++)
+    {
+	free(gol->grid[y]);
+    }
+
+    free(gol->grid);
+}
+
+char golReadSafe(struct GameOfLife *gol, unsigned int x, unsigned int y)
+{
+    if(x < 0 || x >= gol->width)
     {
 	return cellDead;
     }
-    else if(y < 0 || y >= GRID_HEIGHT)
+    else if(y < 0 || y >= gol->height)
     {
 	return cellDead;
     }
@@ -46,14 +66,14 @@ char golReadSafe(struct GameOfLife *gol, int x, int y)
 
 void golRun(struct GameOfLife *gol)
 {
-    char nextGrid[GRID_HEIGHT][GRID_WIDTH];
+    char nextGrid[gol->height][gol->width];
 
     
-    int x, y;
+    unsigned int x, y;
     char numAdjacent;
-    for(x = 0; x < GRID_WIDTH; x++)
+    for(x = 0; x < gol->width; x++)
     {
-	for(y = 0; y < GRID_HEIGHT; y++)
+	for(y = 0; y < gol->height; y++)
 	{
 	    numAdjacent = (golReadSafe(gol, x - 1, y) == cellLive ? 1 : 0);
 	    numAdjacent += (golReadSafe(gol, x + 1, y) == cellLive ? 1 : 0);
@@ -79,9 +99,9 @@ void golRun(struct GameOfLife *gol)
 	}
     }
 
-    for(x = 0; x < GRID_WIDTH; x++)
+    for(x = 0; x < gol->width; x++)
     {
-	for(y = 0; y < GRID_HEIGHT; y++)
+	for(y = 0; y < gol->height; y++)
 	{
 	    gol->grid[y][x] = nextGrid[y][x];
 	}
@@ -90,9 +110,9 @@ void golRun(struct GameOfLife *gol)
     gol->numIteration += 1;
 }
 
-void golToggle(struct GameOfLife *gol, int x, int y)
+void golToggle(struct GameOfLife *gol, unsigned int x, unsigned int y)
 {
-    if(x >= 0 && y >= 0 && x < GRID_WIDTH && y < GRID_HEIGHT)
+    if(x >= 0 && y >= 0 && x < gol->width && y < gol->height)
     {
 	gol->grid[y][x] = (gol->grid[y][x] == cellLive ? cellDead : cellLive);
     }
@@ -100,13 +120,13 @@ void golToggle(struct GameOfLife *gol, int x, int y)
 
 void winDraw(struct GameOfLife *gol)
 {
-    char iterBuffer[GRID_WIDTH + 1];
+    char iterBuffer[gol->width + 1];
     sprintf(iterBuffer, "Iteration: %du", gol->numIteration);
     move(0, 0);
     addstr(iterBuffer);
     
-    int y;
-    for(y = 0; y < GRID_HEIGHT; y++)
+    unsigned int y;
+    for(y = 0; y < gol->height; y++)
     {
 	move(y + 1, 0);
 	printw("%s", gol->grid[y]);
@@ -127,7 +147,7 @@ int main()
 
     keypad(stdscr, TRUE); //capture special characters
     
-    golInit(&gol);
+    golInit(&gol, GRID_HEIGHT, GRID_WIDTH);
 
     int ch;
     int running = 1;
@@ -156,5 +176,6 @@ int main()
 
     //run before ending
     endwin();
+    golDisp(&gol);
     return 0;
 }
