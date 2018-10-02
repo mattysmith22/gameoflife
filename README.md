@@ -32,7 +32,7 @@ Iteration: 0
 ## Startup
 
 When compiled, you can run in two different ways:
-* With no arguments, a default grid size of 20x20 is chosen.
+* With no arguments given, it is arranged to fit the screen.
 * If two numerical arguments are given, they are assigned as their height and width respectively.
 
 ## Usage
