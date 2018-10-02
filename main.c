@@ -121,7 +121,7 @@ void golToggle(struct GameOfLife *gol, unsigned int x, unsigned int y)
 void winDraw(struct GameOfLife *gol)
 {
     char iterBuffer[gol->width + 1];
-    sprintf(iterBuffer, "Iteration: %du", gol->numIteration);
+    sprintf(iterBuffer, "Iteration: %d", gol->numIteration);
     move(0, 0);
     addstr(iterBuffer);
     
