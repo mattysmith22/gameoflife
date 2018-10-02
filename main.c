@@ -115,6 +115,42 @@ void golToggle(struct GameOfLife *gol, unsigned int x, unsigned int y)
     }
 }
 
+void resizeGrid(struct GameOfLife *gol, unsigned int newHeight, unsigned int newWidth)
+{
+    unsigned int x, y;
+
+    for(y = 0; y < newHeight && y < gol->height; y++) //For any rows that are not added / removed, change width if necessary
+    {
+        if(gol->width != newWidth)
+        {
+            gol->grid[y] = realloc(gol->grid[y], (newWidth + 1) * sizeof(char));
+            for(x = gol->width; x < newWidth; x++) //For any created cell (between width and newWidth)
+            {
+                gol->grid[y][x] = cellDead;
+            }
+            gol->grid[y][newWidth] = '\0';
+        }
+    }
+
+    for(y = newHeight; y < gol->height; y++) //For any rows that need to be removed
+    {
+        free(gol->grid[y]);
+    }
+
+    gol->grid = realloc(gol->grid, newHeight * sizeof(char*)); //For any row that need to be added
+
+    for(y = gol->height; y < newHeight; y++)
+	{
+		gol->grid[y] = malloc((newWidth + 1) * sizeof(char));
+		for(x = 0; x < newWidth; x++)
+			gol->grid[y][x] = cellDead;
+		gol->grid[y][newWidth];
+	}
+	
+	gol->width = newWidth;
+	gol->height = newHeight;
+}
+
 void winDraw(struct GameOfLife *gol)
 {
     clear();
@@ -143,7 +179,7 @@ void clearGrid(struct GameOfLife* gol){
 int main(int argc, char **argv)
 {
     struct GameOfLife gol;
-    //initalise the curses screen
+    //initialise the curses screen
     initscr();
     cbreak(); //Disable buffering of typed characters
     noecho(); //suppress echo of character
@@ -178,8 +214,8 @@ int main(int argc, char **argv)
         ch = wgetch(stdscr);
         switch(ch) {
             case 'q':
-            running = 0;
-            break;
+                running = 0;
+                break;
             case 'n':
                 golRun(&gol);
                 winDraw(&gol);
@@ -198,9 +234,11 @@ int main(int argc, char **argv)
             case KEY_RESIZE:
                 if (argc == 1) //if no arguments were given, and it should therefore be on autoresize
                 {
+					endwin();
+					refresh();
                     getmaxyx(stdscr, height, width);
                     height--;
-                    //run command to resize
+                    resizeGrid(&gol, height, width);
                     winDraw(&gol);
                 }
         }
