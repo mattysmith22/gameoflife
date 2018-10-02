@@ -120,6 +120,7 @@ void golToggle(struct GameOfLife *gol, unsigned int x, unsigned int y)
 
 void winDraw(struct GameOfLife *gol)
 {
+    clear();
     char iterBuffer[gol->width + 1];
     sprintf(iterBuffer, "Iteration: %d", gol->numIteration);
     move(0, 0);
@@ -132,6 +133,14 @@ void winDraw(struct GameOfLife *gol)
 	printw("%s", gol->grid[y]);
     }
     refresh();
+}
+
+void clearGrid(struct GameOfLife* gol){
+	unsigned int i,j;
+	for(i = 0; i < gol->height; i++)
+		for(j = 0; j < gol->width; j++)
+			gol->grid[i][j] = cellDead;
+	gol->numIteration = 0;
 }
 
 int main(int argc, char **argv)
@@ -175,6 +184,11 @@ int main(int argc, char **argv)
 	    case 'n':
 	        golRun(&gol);
 		winDraw(&gol);
+		break;
+	    case 'c':
+		clearGrid(&gol);
+		winDraw(&gol);
+	   	break;
 	    case KEY_MOUSE:
 		if(getmouse(&mouseEvent) == OK && (mouseEvent.bstate & BUTTON1_PRESSED))
 		{
