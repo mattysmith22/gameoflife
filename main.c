@@ -3,7 +3,6 @@
 #include <curses.h>
 #include <string.h>
 #include "gol.h"
-#include "data.h"
 
 void winDraw(struct GameOfLife *gol)
 {

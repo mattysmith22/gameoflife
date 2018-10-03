@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "gol.h": "c",
+        "stdlib.h": "c"
+    }
+}

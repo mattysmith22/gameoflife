@@ -2,7 +2,14 @@
 #ifndef GOL_H_INCLUDED
 #define GOL_H_INCLUDED
 
-#include "data.h"
+const char cellLive;
+const char cellDead;
+
+struct GameOfLife {
+	char **grid;
+	unsigned int height, width;
+	unsigned int numIteration;
+};
 
 void golInit(struct GameOfLife *gol, unsigned int height, unsigned int width);
 

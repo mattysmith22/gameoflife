@@ -1,6 +1,8 @@
 #include <stdlib.h>
-#include "data.h"
 #include "gol.h"
+
+const char cellLive = '#';
+const char cellDead = '-';
 
 void golInit(struct GameOfLife *gol, unsigned int height, unsigned int width)
 {
