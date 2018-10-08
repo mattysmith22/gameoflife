@@ -4,37 +4,49 @@
 const char cellLive = '#';
 const char cellDead = '-';
 
+char** mallocGolArray(unsigned int height, unsigned int width)
+{
+    unsigned int x, y;
+    char** grid = malloc(sizeof(char*) * height);
+
+    for(y = 0; y < height; y++)
+    {
+        grid[y] = malloc(sizeof(char) * (width + 1));
+
+        for(x = 0; x < width; x++)
+        {
+            grid[y][x] = cellDead;
+        }
+        grid[y][width] = '\0';
+    }
+
+    return grid;
+}
+
+void freeGolArray(char** array, unsigned int height, unsigned int width)
+{
+    unsigned int y;
+    for(y = 0; y < height; y++)
+    {
+        free(array[y]);
+    }
+
+    free(array);
+}
+
 void golInit(struct GameOfLife *gol, unsigned int height, unsigned int width)
 {
     gol->height = height;
     gol->width = width;
 
-    gol->grid = malloc(sizeof(char*) * height);
-
-    unsigned int x, y;
-    for(y = 0; y < height; y++)
-    {
-        gol->grid[y] = malloc(sizeof(char) * (width + 1));
-
-        for(x = 0; x < width; x++)
-        {
-            gol->grid[y][x] = cellDead;
-        }
-        gol->grid[y][width] = '\0';
-    }
-
     gol->numIteration = 0;
+
+    gol->grid = mallocGolArray(gol->height, gol->width);
 }
 
 void golDisp(struct GameOfLife *gol)
 {
-    unsigned int y;
-    for(y = 0; y < gol->height; y++)
-    {
-        free(gol->grid[y]);
-    }
-
-    free(gol->grid);
+    freeGolArray(gol->grid, gol->height, gol->width);
 }
 
 char golReadSafe(struct GameOfLife *gol, unsigned int x, unsigned int y)
@@ -55,11 +67,13 @@ char golReadSafe(struct GameOfLife *gol, unsigned int x, unsigned int y)
 
 void golRun(struct GameOfLife *gol)
 {
-    char nextGrid[gol->height][gol->width];
-
-    
+    char **nextGrid;
     unsigned int x, y;
     char numAdjacent;
+
+    nextGrid = mallocGolArray(gol->height, gol->width);
+
+
     for(x = 0; x < gol->width; x++)
     {
         for(y = 0; y < gol->height; y++)
@@ -88,13 +102,9 @@ void golRun(struct GameOfLife *gol)
         }
     }
 
-    for(x = 0; x < gol->width; x++)
-    {
-        for(y = 0; y < gol->height; y++)
-        {
-            gol->grid[y][x] = nextGrid[y][x];
-        }
-    }
+    freeGolArray(gol->grid, gol->height, gol->width);
+
+    gol->grid = nextGrid;
 
     gol->numIteration += 1;
 }
@@ -111,12 +121,12 @@ void golResize(struct GameOfLife *gol, unsigned int newHeight, unsigned int newW
 {
     unsigned int x, y;
 
-    for(y = 0; y < newHeight && y < gol->height; y++) //For any rows that are not added / removed, change width if necessary
+    for(y = 0; y < newHeight && y < gol->height; y++) /*For any rows that are not added / removed, change width if necessary*/
     {
         if(gol->width != newWidth)
         {
             gol->grid[y] = realloc(gol->grid[y], (newWidth + 1) * sizeof(char));
-            for(x = gol->width; x < newWidth; x++) //For any created cell (between width and newWidth)
+            for(x = gol->width; x < newWidth; x++) /*For any created cell (between width and newWidth)*/
             {
                 gol->grid[y][x] = cellDead;
             }
@@ -124,19 +134,19 @@ void golResize(struct GameOfLife *gol, unsigned int newHeight, unsigned int newW
         }
     }
 
-    for(y = newHeight; y < gol->height; y++) //For any rows that need to be removed
+    for(y = newHeight; y < gol->height; y++) /*For any rows that need to be removed*/
     {
         free(gol->grid[y]);
     }
 
-    gol->grid = realloc(gol->grid, newHeight * sizeof(char*)); //For any row that need to be added
+    gol->grid = realloc(gol->grid, newHeight * sizeof(char*)); /*For any row that need to be added*/
 
     for(y = gol->height; y < newHeight; y++)
 	{
 		gol->grid[y] = malloc((newWidth + 1) * sizeof(char));
 		for(x = 0; x < newWidth; x++)
 			gol->grid[y][x] = cellDead;
-		gol->grid[y][newWidth];
+		gol->grid[y][newWidth] = '\0';
 	}
 	
 	gol->width = newWidth;
